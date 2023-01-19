@@ -1,120 +1,148 @@
 import math
+from random import randint
 
-def get_number_covered(grid: str, p: str):
-    width_grid = math.sqrt(len(grid))
-    nb_i = 0
-    # Count how many points has the AI
-    for i in range(len(grid)):
-        if (grid[i] == '1'):
-            nb_i += 1
-    # Play the new pawns
-    m= []
-    for i in range(len(grid)):
-        m.append(grid[i])
-    for i in range(len(p)):
-        if (p[i] == '1'):
-            m[i] = '1'
-            if (i%width_grid != width_grid-1):
-                m[i+1] = '1'
-            if (i%width_grid != 0):
-                m[i-1] = '1'
-            if (i>=width_grid):
-                m[i - width_grid] = '1'
-            if (i < width_grid*width_grid - width_grid):
-                m[i + width_grid] = '1'
-    # Count how many points has the AI after playing
-    new_nb_i = 0
-    for i in range(len(m)):
-        if (m[i] == '1'):
-            new_nb_i += 1
-    # Return the number of points added with this pawn placement
-    return new_nb_i - nb_i
-
-def get_covered_from_2_points(grid: str, p: str):
-    nb_1 = 0
-    # Remove combinaisons with more than 2 points to place
-    for i in range(len(p)):
-        if (p[i] == '1'):
-            nb_1 += 1
-    if (nb_1 == 2):
-        # Remove combinaisons where we can't place at least one point
-        for i in range(len(grid)):
-            if (grid[i] != '0' and p[i] == '1'):
-                nb_1 -= 1
-        if (nb_1 == 2):
-            nb_cov = get_number_covered(grid, p)
-            return nb_cov
-        else:
-            return 0
-    else:
-        return 0
+from strat1 import use_strat_1, get_nb_cases
+#from strat2 import use_strat_2
+from strat3 import use_strat_3
 
 
-#Stratégie 1
-combinaisons = []
-def get_binaire_combinaisons(n: int, str: str = ""):
-    global combinaisons
-    # Cas de base : si n est égal à zéro, on n'a plus rien à faire
-    if n == 0:
-        combinaisons.append(str)
-        return
-    
-    # Sinon, on affiche la combinaison binaire courante et on appelle récursivement la fonction
-    # en diminuant n de 1
-    str0 = str + "0"
-    get_binaire_combinaisons(n - 1, str0)
-    str1 = str + "1"
-    get_binaire_combinaisons(n - 1, str1)
-    
-def get_nb_cases(grid: str):
-    nb_cases = 0
-    for i in range(len(grid)):
-        if (grid[i] == '0'):
-            nb_cases = nb_cases + 1
-    return nb_cases
-
-def get_possible_playable_combinaisons(grid: str):
-    global combinaisons
-    combinaisons = []
-    max_ = 0 # Maximal new points
-    best_mov = "" # Pawns placement for minimal number
-    nb_cases = get_nb_cases(grid)
-    get_binaire_combinaisons(nb_cases)
-    for i in range(len(combinaisons)):
-        comb = ""
-        ind = 0
-        for j in range(len(grid)):
-            if(grid[j] == '0'):
-                comb = comb + combinaisons[i][ind]
-                ind = ind + 1
-            else:
-                comb = comb + "0"
-        combinaisons[i] = comb
-        nb_new_cases = get_covered_from_2_points(grid, comb)
-        if max_ < nb_new_cases:
-            max_ = nb_new_cases
-            best_mov = comb
-            
-    return best_mov
-
+# Placer les pions données par "p"
 def place_pawn(grid, p):
+    width_grid = int(math.sqrt(len(grid)))
     newgrid = []
     for i in range (len(grid)):
-        newgrid = grid[i]
+        newgrid.append(grid[i])
+    for i in range (len(grid)):
+        if (p[i] != '0'):
+            newgrid[i] = p[i]
+            if (i%width_grid < width_grid-1):
+                newgrid[i+1] = p[i]
+            if (i%width_grid != 0):
+                newgrid[i-1] = p[i]
+            if (i>=width_grid):
+                newgrid[i - width_grid] = p[i]
+            if (i < width_grid*width_grid - width_grid):
+                newgrid[i + width_grid] = p[i]
+
+    strgrid = ""
+    for i in range(len(newgrid)):
+        strgrid += newgrid[i]
+    return strgrid
+
+# Afficher la grille
+def display_grid(grid):
+    width_grid = int(math.sqrt(len(grid)))
+    first = "    "
+    for i in range(width_grid):
+        first += "" + str(i) + " "
+    print(first + "\n")
+    for i in range(width_grid):
+        line = "" + str(i) + "   "
+        for ii in range(width_grid):
+            c = grid[i*width_grid+ii]
+            if (c == '0'):
+                line += "- "
+            elif(c == '1'):
+                line += 'O '
+            else:
+                line += 'X '
+        print(line)
+        
+    ia_count = 0
+    j_count = 0
+    for i in range(len(grid)):
+        if (grid[i] == '1'):
+            ia_count += 1
+        elif (grid[i] == '2'):
+            j_count += 1
+    print("Vous : " + str(j_count) + ", IA : " + str(ia_count))
+
+# Demander des coordonnées correctes
+def get_correct_input(width_grid, txt):
+    x = -1
+    while (x < 0 or x >= width_grid):
+        x_str = input("Entrer la coordonnée" + txt + " : ")
+        if (x_str != ''):
+            x = int(x_str)
+    return x
+
+# Tour du joueur
+def player_play(grid):
+    width_grid = int(math.sqrt(len(grid)))
+    display_grid(grid)
     
-        if (p[i] == 1):
-            
-    return newgrid
 
+    x1 = get_correct_input(width_grid, " X du premier point")
+    y1 = get_correct_input(width_grid, " Y du premier point")
+
+    while (grid[x1 + y1*width_grid] != '0'):
+        print("Impossible de jouer ici")
+        x1 = get_correct_input(width_grid, " X du premier point")
+        y1 = get_correct_input(width_grid, " Y du premier point")
+
+    x2 = -1
+    y2 = -1
+    if (get_nb_cases(grid) > 1):
+        x2 = get_correct_input(width_grid, " X du second point")
+        y2 = get_correct_input(width_grid, " Y du second point")
+        while (grid[x2 + y2*width_grid] != '0' or (x1 == x2 and y1 == y2)):
+            print("Impossible de jouer ici")
+            x2 = get_correct_input(width_grid, " X du second point")
+            y2 = get_correct_input(width_grid, " Y du second point")
+
+    p = ""
+    for i in range(len(grid)):
+        if (i == x1 + y1 * width_grid or i == x2 + y2 * width_grid):
+            p += '2'
+        else:
+            p += '0'
+    return p
+
+
+# Lancement de la partie
 def play(width_grid: int):
-    while get_nb_cases(grid) != 0:
-        # Generate empty grid
-        grid = ""
-        for i in range(width_grid*width_grid):
+    # Generate empty grid
+    grid = ""
+    for i in range(width_grid):
+        for i in range(width_grid):
             grid += '0'
-        print(get_possible_playable_combinaisons(grid))
+    
+    while get_nb_cases(grid) != 0:
+        p_j = player_play(grid)
+        grid = place_pawn(grid, p_j)
+        if (get_nb_cases(grid) != 0):
+            p_ia = get_comb_ia(grid)
+            grid = place_pawn(grid, p_ia)
+    # while get_nb_cases(grid) != 0:
+    #     p_ia = get_comb_ia(grid)
+    #     grid = place_pawn(grid, p_ia)
+    #     if (get_nb_cases(grid) != 0):
+    #         p_j = player_play(grid)
+    #         grid = place_pawn(grid, p_j)
+    
+    display_grid(grid)
+
+    ia_count = 0
+    j_count = 0
+    for i in range(len(grid)):
+        if (grid[i] == '1'):
+            ia_count += 1
+        elif (grid[i] == '2'):
+            j_count += 1
+    if (j_count > ia_count):
+        print("Vous avez gagné !")
+    elif(j_count == ia_count):
+        print("Egalité ! Dommage...")
+    else:
+        print("Vous avez perdu !")
 
 
+
+# Retourne le meilleur placement de 2 pions
+def get_comb_ia(grid: str):
+    best_mov = use_strat_3(grid)
+
+    return best_mov
 
 play(4)
 
