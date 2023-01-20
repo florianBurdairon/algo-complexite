@@ -2,7 +2,7 @@ import math
 from random import randint
 
 from strat1 import use_strat_1, get_nb_cases
-#from strat2 import use_strat_2
+from strat2 import use_strat_2
 from strat3 import use_strat_3
 
 
@@ -140,9 +140,9 @@ def play(width_grid: int):
 
 # Retourne le meilleur placement de 2 pions
 def get_comb_ia(grid: str):
-    best_mov = use_strat_3(grid)
+    best_mov = use_strat_2(grid)
 
     return best_mov
 
-play(4)
+play(6)
 

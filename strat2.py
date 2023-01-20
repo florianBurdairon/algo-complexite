@@ -1,5 +1,4 @@
 import math
-from strat1 import get_nb_cases
 
 
 # Placer les pions données par "p"
@@ -27,10 +26,12 @@ def place_pawn(grid, p):
 
 # Récupérer les combinaisons jouables
 def get_binaire_combinaisons(n: int,grid = "", val="1"):
+    combinaisons = []
+
     def get_binaire_combinaisons_recur(n: int,p,i=0):
         # Cas de base : si n est égal à zéro, on n'a plus rien à faire
         if i == 2:
-            get_binaire_combinaisons_recur.combinaisons.append("".join(p))
+            combinaisons.append("".join(p))
             return
         if n == 0:
             return
@@ -45,43 +46,85 @@ def get_binaire_combinaisons(n: int,grid = "", val="1"):
             str1[n-1] = val
         get_binaire_combinaisons_recur(n - 1,str1 ,i)
 
-    get_binaire_combinaisons_recur.combinaisons = []
     get_binaire_combinaisons_recur(n,list('0'*n))
-    return get_binaire_combinaisons_recur.combinaisons
 
-# print(get_binaire_combinaisons(5,'00200'));
+    #Recherche des coups simple
+    if(len(combinaisons) == 0 and grid.count('0')):
+        p = list('0'*n)
+        p[grid.find('0')] = val
+        return ["".join(p)]
 
+    return combinaisons
 
+# print(get_binaire_combinaisons(9,'010111011',"2"));
 
-def use_strat_2(depth: int,maximizing:bool ,grid: str):
-   
-    complet = True
-    for i in range(len(grid)):
-        if grid[i] == "0":
-            complet = False
-            break
-    print(depth,complet)
-    if(depth == 0 or complet):
-        #########Debug
-        # print(depth,complet)
-        # print("----")
+def use_strat_2(grid: str,maxdepth = 3):
+    def minmax(depth: int,maximizing:bool ,grid: str):
+        # #########Debug
         # total=""
         # for itext in range(len(grid)):
-        #     total += grid[itext] + ( "\n" if (itext+1)%int(math.sqrt(len(grid))) == 0 else "")
-        # print(total)
-        #########Debug
-        return 
+        #     total += grid[itext] + ( "n" if (itext+1)%int(math.sqrt(len(grid))) == 0 else "")
+        # minmax.output.append("\t"*(maxdepth-depth)+total)
+        # #########Debug
 
-    for tentative in get_binaire_combinaisons(len(grid),grid,"1" if maximizing else "2"):
-        choix = place_pawn(grid,tentative)
-        print(tentative)
-        print("----")
-        total=""
-        for itext in range(len(choix)):
-            total += choix[itext] + ( "\n" if (itext+1)%int(math.sqrt(len(choix))) == 0 else "")
-        print(total)
-        use_strat_2(depth-1,not maximizing,choix);
     
-use_strat_2(3,True,"0"*9)
+        complet = True
+        for i in range(len(grid)):
+            if grid[i] == "0":
+                complet = False
+                break
+        if(depth == 0 or complet):
+            count = 0
+            joueur = "2" if maximizing else "1"
+            for i in range(len(grid)):
+                if grid[i] == joueur:
+                    count+=1
+            return count
+        if(maximizing):
+            val = -math.inf
+            for tentative in get_binaire_combinaisons(len(grid),grid,"1" if maximizing else "2"):
+                choix = place_pawn(grid,tentative)
+                iteration = minmax(depth-1,not maximizing,choix)
+                if(iteration > val):
+                    minmax.bestMove = tentative
+                    val = iteration
+        else:
+            val = math.inf
+            for tentative in get_binaire_combinaisons(len(grid),grid,"1" if maximizing else "2"):
+                choix = place_pawn(grid,tentative)
+                iteration = minmax(depth-1,not maximizing,choix)
+                if(iteration < val):
+                    val = iteration
+        return val
+    minmax.bestMove = ""
+    minmax.output = []
+    minmax(maxdepth,True,grid)
+    return minmax.bestMove
+    
+    #########Debug
+    # total = "strict graph {"
+    # id = 0
+    # queue = []
+    # output = "\n".join(minmax.output)
+
+    # for element in output.split("\n"):
+    #     total+= str(id) + ' [label="'+element.replace("\t","").replace("n","\n")+'"] '
+    #     if(len(queue) < element.count("\t")):
+    #         queue.append(id-1)
+    #     while(len(queue) > element.count("\t")):
+    #         queue.pop()
+    #     if(len(queue)):
+    #         predID= queue[-1]
+    #         total+= str(predID) + " -- " +str(id)+"\n"
+    #     id+=1
+    # total +="}"
+    # print(total)
+    ########Debug
+
+
+
+
+
+
 
 
