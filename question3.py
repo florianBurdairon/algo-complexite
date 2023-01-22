@@ -69,8 +69,6 @@ def get_correct_input(width_grid, txt):
 # Tour du joueur
 def player_play(grid):
     width_grid = int(math.sqrt(len(grid)))
-    display_grid(grid)
-    
 
     x1 = get_correct_input(width_grid, " X du premier point")
     y1 = get_correct_input(width_grid, " Y du premier point")
@@ -100,7 +98,7 @@ def player_play(grid):
 
 
 # Lancement de la partie
-def play(width_grid: int):
+def play(width_grid: int, strat: int):
     # Generate empty grid
     grid = ""
     for i in range(width_grid):
@@ -108,17 +106,15 @@ def play(width_grid: int):
             grid += '0'
     
     while get_nb_cases(grid) != 0:
+        display_grid(grid)
         p_j = player_play(grid)
         grid = place_pawn(grid, p_j)
+        print("\nVous avez joué : ")
+        display_grid(grid)
         if (get_nb_cases(grid) != 0):
-            p_ia = get_comb_ia(grid)
+            p_ia = get_comb_ia(grid, strat)
             grid = place_pawn(grid, p_ia)
-    # while get_nb_cases(grid) != 0:
-    #     p_ia = get_comb_ia(grid)
-    #     grid = place_pawn(grid, p_ia)
-    #     if (get_nb_cases(grid) != 0):
-    #         p_j = player_play(grid)
-    #         grid = place_pawn(grid, p_j)
+            print("\nL'IA a joué : ")
     
     display_grid(grid)
 
@@ -139,10 +135,20 @@ def play(width_grid: int):
 
 
 # Retourne le meilleur placement de 2 pions
-def get_comb_ia(grid: str):
-    best_mov = use_strat_2(grid)
+def get_comb_ia(grid: str, strat: int):
+    if strat == 1:
+        best_mov = use_strat_1(grid)
+    elif strat == 2:
+        best_mov = use_strat_2(grid)
+    elif strat == 3:
+        best_mov = use_strat_3(grid)
 
     return best_mov
 
-play(6)
+
+
+width = int(input("\n Entrer la taille de grille souhaitée (recommandée entre 3 et 5) : "))
+strat = int(input(" Choisissez votre mode d'IA :\n  1 = Tout par tour (Stratégie 1) \n  2 = minimax (Stratégie 2) \n  3 = Monte Carlo (Stratégie 3)\n Votre choix : "))
+
+play(width, strat)
 
