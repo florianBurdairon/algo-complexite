@@ -29,7 +29,11 @@ def get_binaire_combinaisons(n: int,grid:list, val="1"):
     def get_binaire_combinaisons_recur(n: int,p:list,i=0):
         # Cas de base : si n est égal à zéro, on n'a plus rien à faire
         if i == 2:
-            combinaisons.append(p.copy())
+            coup = ['0']*len(p)
+            for i in range(len(coup)):
+                if grid[i] == '0':
+                    coup[i] = p[i]
+            combinaisons.append(coup)
             return
         if n == 0:
             return
@@ -52,7 +56,7 @@ def get_binaire_combinaisons(n: int,grid:list, val="1"):
         return [p]
     return combinaisons
 
-def use_strat_2(grid: str,maxdepth = 3):
+def use_strat_2(grid: str,maxdepth = 4):
     def minmax(depth: int,maximizing:bool ,grid: str,alpha:int,beta:int):
         complet = True
         for i in range(len(grid)):
@@ -69,7 +73,7 @@ def use_strat_2(grid: str,maxdepth = 3):
             val = -math.inf
             for tentative in get_binaire_combinaisons(len(grid),grid,"1"):
                 choix = place_pawn(grid,tentative)
-                iteration = minmax(depth-1,True,choix,alpha,beta)
+                iteration = minmax(depth-1,False,choix,alpha,beta)
                 if(iteration > val):
                     if(maxdepth == depth):
                         minmax.bestMove = tentative
@@ -81,7 +85,7 @@ def use_strat_2(grid: str,maxdepth = 3):
             val = math.inf
             for tentative in get_binaire_combinaisons(len(grid),grid,"2"):
                 choix = place_pawn(grid,tentative)
-                val = min(val,minmax(depth-1,False,choix,alpha,beta))
+                val = min(val,minmax(depth-1,True,choix,alpha,beta))
                 if val < alpha:
                     break 
                 beta = min(beta, val)
