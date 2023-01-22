@@ -48,7 +48,7 @@ def get_binaire_combinaisons(n: int,grid:list, val="1"):
         p =  ['0'] * len(grid)
         for i in range(len(grid)):
             if(grid[i] == '0'):
-                p[i] =  val;
+                p[i] =  val
         return [p]
     return combinaisons
 
